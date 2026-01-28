@@ -218,10 +218,7 @@ def new_account_page():
                         
                         if checkout_url:
                             # Redirect to Stripe Checkout
-                            st.markdown(
-                                f'<meta http-equiv="refresh" content="0;url={checkout_url}">',
-                                unsafe_allow_html=True
-                            )
+                            st.html(f'<script>window.top.location.href = "{checkout_url}";</script>')
                             st.info("Redirecting to secure payment...")
                     else:
                         st.error("Unable to process purchase. Please try again.")
