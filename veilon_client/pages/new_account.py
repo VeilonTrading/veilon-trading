@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 from streamlit_extras.stylable_container import stylable_container
 import veilon_client.static.elements.layout as layouts
 from veilon_client.pages.routes import DASHBOARD_PAGE
@@ -14,6 +13,7 @@ import time
 
 # Initialize Stripe
 stripe.api_key = "sk_test_51SUrJdDgd8xHlmy8vynadqa6yberuIbvkqm8AMnjbz1ukorwuezTw8TZ6G6SuP0LnxRkM1uphH1CJLrCuCPPJsnU00bnPFyALv"
+
 
 def get_user_id():
     """
@@ -72,6 +72,9 @@ def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
             st.error("This plan is not configured for payment. Please contact support.")
             return None
         
+        # Base URL for Streamlit Cloud
+        base_url = "https://veilontrading.streamlit.app"
+        
         # Create the checkout session
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
@@ -80,14 +83,14 @@ def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
                 'quantity': 1,
             }],
             mode='payment',
-            success_url="https://veilontrading.streamlit.app/_checkout_page?payment_success=true",
-            cancel_url="https://veilontrading.streamlit.app/_checkout_page?payment_canceled=true",
+            success_url=f"{base_url}/_checkout_page?payment_success=true",
+            cancel_url=f"{base_url}/_checkout_page?payment_canceled=true",
             client_reference_id=str(user_id),
             customer_email=user_email,
             metadata={
                 'user_id': str(user_id),
                 'plan_id': str(plan['id']),
-                'account_size': str(int(plan['account_size'])),  # Ensure integer string
+                'account_size': str(int(plan['account_size'])),
             }
         )
         
@@ -108,12 +111,11 @@ def new_account_page():
     if query_params.get("payment_success") == "true":
         st.success("✅ Payment successful! Your evaluation account is being set up...")
         st.info("⏳ Redirecting to dashboard...")
-        time.sleep(2)  # Brief pause so user sees the message
+        time.sleep(2)
         st.switch_page(DASHBOARD_PAGE)
     
     if query_params.get("payment_canceled") == "true":
         st.warning("⚠️ Payment was canceled. You can try again when you're ready.")
-        # Clear the query param
         st.query_params.clear()
     
     # Back button
@@ -178,7 +180,6 @@ def new_account_page():
             st.session_state.eval_balance = eval_balance
         
         st.space("xxsmall")
-        
 
         # Terms and Purchase button
         with st.container(border=False, horizontal=True, vertical_alignment="center"):
@@ -221,11 +222,8 @@ def new_account_page():
                         checkout_url = create_stripe_checkout_session(plan, user_id, user_email)
                         
                         if checkout_url:
-                            # Redirect to Stripe Checkout
-                            st.markdown(
-                                f'<meta http-equiv="refresh" content="0;url={checkout_url}">',
-                                unsafe_allow_html=True
-                            )
+                            # Redirect using window.top to escape iframe
+                            st.html(f'<script>window.top.location.href = "{checkout_url}";</script>')
                             st.info("Redirecting to secure payment...")
                     else:
                         st.error("Unable to process purchase. Please try again.")
