@@ -60,6 +60,9 @@ def get_plan_from_db(account_size: int, eval_type: str = "1-Step"):
         st.error(f"Error fetching plan: {e}")
         return None
 
+def get_base_url():
+    """Get the base URL of the current Streamlit app."""
+    return "https://veilontrading.streamlit.app"
 
 def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
     try:
