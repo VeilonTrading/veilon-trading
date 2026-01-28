@@ -1,0 +1,44 @@
+/* ===============================
+   Global App Background
+   =============================== */
+[data-testid="stAppViewContainer"] {
+    position: relative;
+
+    background:
+        radial-gradient(
+            600px 400px at 20% 20%,
+            rgba(255, 255, 255, 0.06),
+            transparent 60%
+        ),
+        radial-gradient(
+            500px 350px at 80% 30%,
+            rgba(0, 140, 255, 0.06),
+            transparent 60%
+        ),
+        radial-gradient(
+            700px 500px at 50% 80%,
+            rgb(47, 198, 160, 0.05),
+            transparent 65%
+        ),
+        #0e0e0e;
+}
+
+/* Transparent header */
+[data-testid="stHeader"] {
+    background: transparent;
+}
+
+/* ===============================
+   Glassmorphism Utility
+   =============================== */
+.glass-tile {
+    background: rgba(23, 23, 23, 0.55) !important;
+    border: 1px solid #3c3c3c !important;
+    border-radius: 8px;
+    padding: 16px;
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
