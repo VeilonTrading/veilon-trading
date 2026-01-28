@@ -60,16 +60,19 @@ def get_plan_from_db(account_size: int, eval_type: str = "1-Step"):
         st.error(f"Error fetching plan: {e}")
         return None
 
-def get_base_url():
-    """Get the base URL of the current Streamlit app."""
-    return "https://veilontrading.streamlit.app"
 
 def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
+    """
+    Create a Stripe Checkout Session for the selected plan.
+    Returns the checkout URL or None if failed.
+    """
     try:
+        # Validate plan has Stripe IDs
         if not plan.get('stripe_price_id'):
-            st.error("This plan is not configured for payment.")
+            st.error("This plan is not configured for payment. Please contact support.")
             return None
         
+        # Create the checkout session
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
@@ -77,15 +80,14 @@ def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
                 'quantity': 1,
             }],
             mode='payment',
-            # Try without the page path - just base URL
-            success_url="https://veilontrading.streamlit.app/?payment_success=true",
-            cancel_url="https://veilontrading.streamlit.app/?payment_canceled=true",
+            success_url="https://veilontrading.streamlit.app/_checkout_page?payment_success=true",
+            cancel_url="https://veilontrading.streamlit.app/_checkout_page?payment_canceled=true",
             client_reference_id=str(user_id),
             customer_email=user_email,
             metadata={
                 'user_id': str(user_id),
                 'plan_id': str(plan['id']),
-                'account_size': str(int(plan['account_size'])),
+                'account_size': str(int(plan['account_size'])),  # Ensure integer string
             }
         )
         
@@ -93,6 +95,9 @@ def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
         
     except stripe.error.StripeError as e:
         st.error(f"Payment error: {str(e)}")
+        return None
+    except Exception as e:
+        st.error(f"Error creating checkout: {str(e)}")
         return None
 
 
@@ -217,7 +222,10 @@ def new_account_page():
                         
                         if checkout_url:
                             # Redirect to Stripe Checkout
-                            st.html(f'<script>window.top.location.href = "{checkout_url}";</script>')
+                            st.markdown(
+                                f'<meta http-equiv="refresh" content="0;url={checkout_url}">',
+                                unsafe_allow_html=True
+                            )
                             st.info("Redirecting to secure payment...")
                     else:
                         st.error("Unable to process purchase. Please try again.")
