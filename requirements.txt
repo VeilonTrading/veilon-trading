@@ -1,0 +1,16 @@
+streamlit
+streamlit-extras
+st_social_media_links
+pandas
+altair
+psycopg2-binary
+millify
+datetime
+metaapi-cloud-sdk
+dotenv
+Authlib
+watchdog
+math
+plotly
+stripe
+certifi
