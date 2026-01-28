@@ -70,8 +70,6 @@ def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
             st.error("This plan is not configured for payment.")
             return None
         
-        base_url = get_base_url()
-        
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
@@ -79,8 +77,9 @@ def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
                 'quantity': 1,
             }],
             mode='payment',
-            success_url=f"{base_url}/Dashboard?payment_success=true",
-            cancel_url=f"{base_url}/New_Account?payment_canceled=true",
+            # Try without the page path - just base URL
+            success_url="https://veilontrading.streamlit.app/?payment_success=true",
+            cancel_url="https://veilontrading.streamlit.app/?payment_canceled=true",
             client_reference_id=str(user_id),
             customer_email=user_email,
             metadata={
