@@ -80,8 +80,8 @@ def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
                 'quantity': 1,
             }],
             mode='payment',
-            success_url="http://localhost:8501/New_Account?payment_success=true",
-            cancel_url="http://localhost:8501/New_Account?payment_canceled=true",
+            success_url="http://veilontrading.streamlit.app/New_Account?payment_success=true",
+            cancel_url="http://veilontrading.streamlit.app/New_Account?payment_canceled=true",
             client_reference_id=str(user_id),
             customer_email=user_email,
             metadata={
