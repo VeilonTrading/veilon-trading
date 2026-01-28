@@ -5,12 +5,10 @@ pandas
 altair
 psycopg2-binary
 millify
-datetime
 metaapi-cloud-sdk
-dotenv
+python-dotenv
 Authlib
 watchdog
-math
-plotly
-stripe
 certifi
+stripe
+plotly
