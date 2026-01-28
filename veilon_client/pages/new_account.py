@@ -151,6 +151,8 @@ def new_account_page():
         st.session_state.eval_balance = None
     if 'terms_accepted' not in st.session_state:
         st.session_state.terms_accepted = False
+    if 'checkout_url' not in st.session_state:
+        st.session_state.checkout_url = None
     
     with st.container(border=False):
         # Selection inputs
@@ -222,11 +224,30 @@ def new_account_page():
                         checkout_url = create_stripe_checkout_session(plan, user_id, user_email)
                         
                         if checkout_url:
-                            # Redirect using window.top to escape iframe
-                            st.html(f'<script>window.top.location.href = "{checkout_url}";</script>')
-                            st.info("Redirecting to secure payment...")
+                            st.session_state.checkout_url = checkout_url
+                            st.rerun()
                     else:
                         st.error("Unable to process purchase. Please try again.")
+        
+        # Show checkout button if URL is ready
+        if st.session_state.checkout_url:
+            st.divider()
+            st.success("✅ Checkout session created!")
+            
+            # DEBUG - show URL (remove after testing)
+            st.code(st.session_state.checkout_url)
+            
+            st.link_button(
+                "🔒 Complete Payment on Stripe", 
+                st.session_state.checkout_url, 
+                type="primary",
+                use_container_width=True
+            )
+            
+            # Clear button
+            if st.button("Cancel", type="tertiary"):
+                st.session_state.checkout_url = None
+                st.rerun()
 
 
 if __name__ == "__main__":
