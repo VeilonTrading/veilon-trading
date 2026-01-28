@@ -62,17 +62,13 @@ def get_plan_from_db(account_size: int, eval_type: str = "1-Step"):
 
 
 def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
-    """
-    Create a Stripe Checkout Session for the selected plan.
-    Returns the checkout URL or None if failed.
-    """
     try:
-        # Validate plan has Stripe IDs
         if not plan.get('stripe_price_id'):
-            st.error("This plan is not configured for payment. Please contact support.")
+            st.error("This plan is not configured for payment.")
             return None
         
-        # Create the checkout session
+        base_url = get_base_url()
+        
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
@@ -80,14 +76,14 @@ def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
                 'quantity': 1,
             }],
             mode='payment',
-            success_url="https://veilontrading.streamlit.app/?payment_success=true",
-            cancel_url="https://veilontrading.streamlit.app/?payment_canceled=true",
+            success_url=f"{base_url}/Dashboard?payment_success=true",
+            cancel_url=f"{base_url}/New_Account?payment_canceled=true",
             client_reference_id=str(user_id),
             customer_email=user_email,
             metadata={
                 'user_id': str(user_id),
                 'plan_id': str(plan['id']),
-                'account_size': str(int(plan['account_size'])),  # Ensure integer string
+                'account_size': str(int(plan['account_size'])),
             }
         )
         
@@ -95,9 +91,6 @@ def create_stripe_checkout_session(plan: dict, user_id: int, user_email: str):
         
     except stripe.error.StripeError as e:
         st.error(f"Payment error: {str(e)}")
-        return None
-    except Exception as e:
-        st.error(f"Error creating checkout: {str(e)}")
         return None
 
 
